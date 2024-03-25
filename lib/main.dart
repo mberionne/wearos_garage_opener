@@ -199,7 +199,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       appBar: _isWatch
           ? null
           : AppBar(
-              title: const Center(child: Text('GarageOpen 2.0')),
+              title: const Center(child: Text('GarageOpen 2.1')),
             ),
       body: Center(
         child: Column(
