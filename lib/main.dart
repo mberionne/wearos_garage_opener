@@ -245,13 +245,22 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   Widget showButton(AppAction appAction) {
     bool isEnabled = _isButtonEnabled(appAction);
+    double fontSize = _isWatch ? 20 : 40;
     return OutlinedButton.icon(
       style: ButtonStyle(
           foregroundColor: MaterialStatePropertyAll<Color>(
               isEnabled ? Colors.white : Colors.white54),
           backgroundColor: MaterialStatePropertyAll<Color>(isEnabled
               ? (appAction == AppAction.open ? Colors.green : Colors.red)
-              : Colors.grey)),
+              : Colors.grey),
+          // Make it as large as the screen
+          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
+              EdgeInsets.all(fontSize)),
+          minimumSize: MaterialStatePropertyAll<Size>(
+              Size(MediaQuery.of(context).size.width, 0)),
+          iconSize: MaterialStatePropertyAll<double>(fontSize),
+          textStyle: MaterialStatePropertyAll<TextStyle>(
+              TextStyle(fontSize: fontSize))),
       onPressed: isEnabled
           ? () {
               log('Button pressed: $appAction.name');
@@ -354,7 +363,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       border: OutlineInputBorder(),
                       hintText: 'Device ID',
                       labelText: 'Device ID',
-                      prefix: Icon(Icons.perm_device_info, color: Colors.white24,),
+                      prefix: Icon(
+                        Icons.perm_device_info,
+                        color: Colors.white24,
+                      ),
                     ),
                     onSaved: (String? value) =>
                         _saveSettings('device_id', value ?? ''),
@@ -373,7 +385,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       border: OutlineInputBorder(),
                       hintText: 'Access token',
                       labelText: 'Access token',
-                      prefix: Icon(Icons.token, color: Colors.white24,),
+                      prefix: Icon(
+                        Icons.token,
+                        color: Colors.white24,
+                      ),
                     ),
                     onSaved: (String? value) =>
                         _saveSettings('access_token', value ?? ''),
