@@ -21,3 +21,5 @@ A few quick instructions:
  - double tap on the state to refresh
  - long press on the state to access the settings
  - settings are saved when the "Save" button is pressed and not by going back.
+
+NOTE: A convenient way to enter the device ID and the token is using the following ADB command: `adb shell input text "text"`.
