@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'settings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -13,25 +13,14 @@ class _SettingsPageState extends State<SettingsPage> {
   double _currentSliderValue = 3.0;
   String _deviceId = '';
   String _accessToken = '';
+  final Settings _settings = Settings();
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
-  }
-
-  void _loadSettings() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _deviceId = prefs.getString('device_id') ?? '';
-      _accessToken = prefs.getString('access_token') ?? '';
-      _currentSliderValue = double.parse(prefs.getString('duration') ?? '3.0');
-    });
-  }
-
-  void _saveSettings(String key, String value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, value);
+    _deviceId = _settings.getDeviceId();
+    _accessToken = _settings.getAccessToken();
+    _currentSliderValue = _settings.getDuration().toDouble();
   }
 
   @override
@@ -63,7 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     onSaved: (String? value) =>
-                        _saveSettings('device_id', value ?? ''),
+                        _settings.setDeviceId(value ?? ''),
                     validator: (String? value) {
                       final regex = RegExp(r'^[0-9A-Fa-f]{24}$');
                       return (value == null || !regex.hasMatch(value))
@@ -85,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     onSaved: (String? value) =>
-                        _saveSettings('access_token', value ?? ''),
+                        _settings.setAccessToken(value ?? ''),
                     validator: (String? value) {
                       final regex = RegExp(r'^[0-9A-Fa-f]{40}$');
                       return (value == null || !regex.hasMatch(value))
@@ -95,15 +84,15 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Duration: ${_currentSliderValue.round()} seconds',
+                    'Duration: ${_currentSliderValue.toInt()} seconds',
                     style: const TextStyle(color: Colors.white),
                   ),
                   Slider(
                       value: _currentSliderValue,
                       min: 1,
                       max: 15,
-                      divisions: 15,
-                      label: _currentSliderValue.round().toString(),
+                      divisions: 14,
+                      label: _currentSliderValue.toInt().toString(),
                       onChanged: (double value) {
                         setState(() {
                           _currentSliderValue = value;
@@ -113,8 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
-                        _saveSettings(
-                            'duration', _currentSliderValue.toString());
+                        _settings.setDuration(_currentSliderValue.toInt());
                         Navigator.pop(context, true);
                       }
                     },

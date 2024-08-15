@@ -13,11 +13,13 @@ enum AppState {
   timeout
 }
 
-enum AppAction { open, close }
+// The names of this enum match the actions on the server.
+enum AppAction { open, close, doorstatus }
 
 abstract class _MainPageController extends State<MainPage> with WidgetsBindingObserver {
   AppState _appState = AppState.error;
   bool _needsRefresh = false;
+  final Settings _settings = Settings();
 
   @override
   void initState() {
@@ -50,9 +52,10 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
     }
   }
 
-  Uri _composeUri(SharedPreferences prefs, String action) {
-    String deviceId = prefs.getString('device_id') ?? '';
-    String accessToken = prefs.getString('access_token') ?? '';
+  Uri _composeUri(AppAction appAction) {
+    String action = appAction.name;
+    String deviceId = _settings.getDeviceId();
+    String accessToken = _settings.getAccessToken();
     return Uri.parse(
         'https://api.particle.io/v1/devices/$deviceId/$action?access_token=$accessToken');
   }
@@ -67,8 +70,7 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
     // Set State to refreshing to update the UI
     _setState(AppState.refreshing);
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final uri = _composeUri(prefs, 'doorstatus');
+    final uri = _composeUri(AppAction.doorstatus);
     AppState newState = AppState.error;
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 8));
@@ -86,7 +88,7 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
     _setState(newState);
     // For opening and closing, these are intermediate states.
     if (newState == AppState.opening || newState == AppState.closing) {
-      int delay = double.parse(prefs.getString('duration') ?? '3.0').round();
+      int delay = _settings.getDuration();
       Future<void>.delayed(
         Duration(seconds: delay),
         () => _refreshState(),
@@ -95,15 +97,14 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
   }
 
   void _onButtonPressed(AppAction appAction) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     Uri? uri;
     // Compose the URI and set the new state based on action and state.
     AppState newState = AppState.error;
     if (appAction == AppAction.open && _appState == AppState.closed) {
-      uri = _composeUri(prefs, 'open');
+      uri = _composeUri(AppAction.open);
       newState = AppState.opening;
     } else if (appAction == AppAction.close && _appState == AppState.open) {
-      uri = _composeUri(prefs, 'close');
+      uri = _composeUri(AppAction.close);
       newState = AppState.closing;
     } else {
       // Nothing to do in invalid state
@@ -120,7 +121,7 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
         // In case of success to issue the request, there is no point in checking
         // the state immediately because the proper value was already set above,
         // but rather schedule it based on the refresh period.
-        int delay = double.parse(prefs.getString('duration') ?? '3.0').round();
+        int delay = _settings.getDuration();
         Future<void>.delayed(
           Duration(seconds: delay),
           () => _refreshState(),

@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'settings_page.dart';
+import 'settings.dart';
 
 part 'main_page_controller.dart';
 
@@ -78,6 +78,8 @@ class _MainPageScreen extends _MainPageController {
         return _appState == AppState.closed;
       case AppAction.close:
         return _appState == AppState.open;
+      case AppAction.doorstatus:
+        return false; // This is impossible
     }
   }
 
