@@ -18,14 +18,23 @@ class Settings {
   String _deviceId = "";
   String _accessToken = "";
   int _duration = 3;
+  bool _isInit = false;
 
   Future init() async {
+    // init() should be invoked only once, so this is an extra protection.
+    // There is a very small window where we execute the body again, but
+    // this is OK because we would read the exact same values.
+    if (_isInit) {
+      return;
+    }
+
     _prefs = await SharedPreferences.getInstance();
     _deviceId = _prefs.getString(deviceIdKey) ?? '';
     _accessToken = _prefs.getString(accessTokenKey) ?? '';
     _duration = int.tryParse(
             _prefs.getString('duration') ?? defaultDuration.toString()) ??
         defaultDuration;
+    _isInit = true;
   }
 
   String getDeviceId() => _deviceId;

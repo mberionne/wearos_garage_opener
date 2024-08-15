@@ -25,7 +25,10 @@ abstract class _MainPageController extends State<MainPage> with WidgetsBindingOb
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _refreshState();
+
+    // Ideally speaking, we should initialize Settings in main(), but that
+    // causes issues to the splash screen. So, we do it from here.
+    Settings().init().then((_) => _refreshState());
   }
 
   @override

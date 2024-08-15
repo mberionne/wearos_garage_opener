@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'main_page_screen.dart';
-import 'settings.dart';
 
-Future main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await Settings().init();
+void main() {
   runApp(const MyApp());
 }
 
